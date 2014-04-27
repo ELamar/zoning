@@ -1,0 +1,168 @@
+<html>
+<head>
+<link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.2/leaflet.css" />
+</head>
+<style>
+svg {
+  position: relative;
+}
+</style>
+
+<!--This file illustrates a map of Leon County Florida, complete with 
+2010 census block heatmap of population-->
+<h1>This is a Draft Concept for a Collaborative Zoning Map.</h1>
+
+<body>
+	<div id="map" style="width: 900px; height: 600px"></div>
+	<div id="detail" style="width: 30%; height: 600px"></div>
+<script type="text/javascript" src="./d3.v3.js" charset="utf-8"></script>
+<!--<script src="http://cdn.leafletjs.com/leaflet-0.7.2/leaflet.js"></script>-->
+<script type="text/javascript" src="./leaflet.js"></script>
+<!--<script src="http://labratrevenge.com/d3-tip/javascripts/d3.tip.v0.6.3.js"></script>-->
+<script src="./jquery-1.9.1.js"></script>
+<!--<script src="./flare4.json"></script>-->
+<!--<script src="./flare5.json"></script>-->
+<script>
+var map;
+var ajaxRequest;
+var plotlist;
+var plotlayers=[];
+
+function initmap() {
+	// set up the map
+	map = new L.Map('map');
+
+	// create the tile layer with correct attribution
+	//var osmUrl='http://www.openstreetmap.org/#map=13/30.4467/-84.3087';
+	//var osmUrl='http://osm.org/go/ZGUQ8RJ';
+	var osmUrl='http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+	var osmAttrib='Map data © <a href="http://openstreetmap.org">OpenStreetMap</a> contributors';
+	var osm = new L.TileLayer(osmUrl, {minZoom: 8, maxZoom: 18, attribution: osmAttrib});		
+
+	// start the map in Tallahassee Florida
+	//map.setView(new L.LatLng(30.4467,-84.3087),11);  //sets view to Leon County
+	map.setView(new L.LatLng(30.4606,-84.2780),15);  //sets view to MidTown Tallahassee
+	map.addLayer(osm);
+	
+	
+ }
+ 
+ initmap();
+ var osmUrl='http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+ var osmAttrib='Map data © <a href="http://openstreetmap.org">OpenStreetMap</a> contributors';
+ var osm = new L.TileLayer(osmUrl, {minZoom: 8, maxZoom: 18, attribution: osmAttrib});	
+ var baselayers = {"baselayer":osm};	
+ 
+ function onEachFeature(feature, layer){
+			
+		  	var med_age = feature.properties.median_age;
+		  	var str = med_age.toString();
+		  	layer.bindPopup("Media age: " + str);
+		  	// if (med_age > 0){
+// 		  		layer.setStyle({fillOpacity:0.7});
+// 		  		}
+// 		  	else{
+// 		  		layer.setStyle({fillOpacity:0});
+// 		  		}
+// [0,15,25,35,45,55,65,75,85])
+			if (med_age > 85){layer.setStyle({fillColor:"#03f",fillOpacity:0.9});}
+			else if (med_age > 75){layer.setStyle({fillColor:"#08306B",fillOpacity:0.5});}
+			else if (med_age > 65){layer.setStyle({fillColor:"#08519C",fillOpacity:0.5});}
+			else if (med_age > 55){layer.setStyle({fillColor:"#2171B5",fillOpacity:0.5});}
+			else if (med_age > 45){layer.setStyle({fillColor:"#4292C6",fillOpacity:0.5});}
+			else if (med_age > 35){layer.setStyle({fillColor:"#6BAED6",fillOpacity:0.5});}
+			else if (med_age > 25){layer.setStyle({fillColor:"#9ECAE1",fillOpacity:0.5});}
+			else if (med_age > 15){layer.setStyle({fillColor:"#C6DBEf",fillOpacity:0.5});}
+			else if (med_age > 0){layer.setStyle({fillColor:"#DEEBF7",fillOpacity:0.5});}
+		  	else {layer.setStyle({fillColor:"#f7fbff", fillOpacity:0});}
+
+			 layer.on("mouseover", function (e) {
+                  //var txt = layer.bindPopup(feature.properties.median_age);
+                 // var text = layer.bindPopup(str);
+            	  var box = document.getElementById('detail');
+                  //layer.bindPopup(feature.properties.median_age);
+                  box.innerHTML = "Median age: " + str;
+              });
+              layer.on("mouseout", function (e) { 
+              box = document.getElementById('detail');
+              box.innerHTML="";
+              }); 
+				
+
+  			}
+  			
+
+function onEachFeature_zone(feature, layer){
+	layer.bindPopup("ID: " + feature.id + "<br>" + "Zoning: " + feature.properties.zoning);
+	}
+	
+function onEachFeature_active(feature, layer){
+	layer.bindPopup("ID: " + feature.id + "<br>" + "Zoning: " + feature.properties.zoning + "<br>" + "<a href='https://github.com/ELamar/Superior-Planning-PUD'>Comment Here</a>");
+	}
+	
+function onEachFeature_pop(feature, layer){
+			
+		  	var pop = feature.properties.population;
+		  	var str = pop.toString();
+		  	layer.bindPopup("Population: " + str);
+		  	// if (med_age > 0){
+// 		  		layer.setStyle({fillOpacity:0.7});
+// 		  		}
+// 		  	else{
+// 		  		layer.setStyle({fillOpacity:0});
+// 		  		}
+// [0,15,25,35,45,55,65,75,85])
+//[0,11,51,101,251,501,901,1201,1500])
+			if (pop > 1500){layer.setStyle({fillColor:"#03f",fillOpacity:0.9});}
+			else if (pop > 1201){layer.setStyle({fillColor:"#08306B",fillOpacity:0.5});}
+			else if (pop > 901){layer.setStyle({fillColor:"#08519C",fillOpacity:0.5});}
+			else if (pop > 501){layer.setStyle({fillColor:"#2171B5",fillOpacity:0.5});}
+			else if (pop > 251){layer.setStyle({fillColor:"#4292C6",fillOpacity:0.5});}
+			else if (pop > 101){layer.setStyle({fillColor:"#6BAED6",fillOpacity:0.5});}
+			else if (pop > 51){layer.setStyle({fillColor:"#9ECAE1",fillOpacity:0.5});}
+			else if (pop > 11){layer.setStyle({fillColor:"#C6DBEf",fillOpacity:0.5});}
+			else if (pop > 0){layer.setStyle({fillColor:"#DEEBF7",fillOpacity:0.5});}
+		  	else {layer.setStyle({fillColor:"#f7fbff", fillOpacity:0});}
+
+			 layer.on("mouseover", function (e) {
+                  //var txt = layer.bindPopup(feature.properties.median_age);
+                 // var text = layer.bindPopup(str);
+            	  var box = document.getElementById('detail');
+                  //layer.bindPopup(feature.properties.median_age);
+                  box.innerHTML = "Population: " + str;
+              });
+              layer.on("mouseout", function (e) { 
+              box = document.getElementById('detail');
+              box.innerHTML="";
+              }); 
+				
+
+  			}
+ 
+
+$.getJSON("./flare5.json", function(json){
+var geojson_d3 = L.geoJson(json,{
+	weight:0,onEachFeature:onEachFeature
+	})
+var geojson3_d3 = L.geoJson(json,{
+	weight:0, onEachFeature:onEachFeature_pop
+	})
+    var overlays = {"median_age" : geojson_d3, "population":geojson3_d3};
+    	
+	$.getJSON("./flare4.json", function(data){
+		var geojson2_d3 = L.geoJson(data,{fill:true, weight:1.5, color:'#800026', fillOpacity: 0, onEachFeature:onEachFeature_zone})  //function(feature,layer){layer.bindPopup(feature.properties.zoning)}})
+    	
+	    overlays["zoning"] =  geojson2_d3;
+	    
+	    $.getJSON("./flare7.json", function(active){
+	    	var geojson2_d4 = L.geoJson(active,{fill:true, weight:1.5, color:'#800026', fillOpacity: 0, onEachFeature:onEachFeature_active})  //function(feature,layer){layer.bindPopup(feature.properties.zoning)}})
+			overlays["active zoning"] =  geojson2_d4;
+			var control = L.control.layers(baselayers, overlays).addTo(map)}
+ 			);
+	  	}
+	  	);
+	  }
+ 	);
+</script>
+</body>
+</html>
